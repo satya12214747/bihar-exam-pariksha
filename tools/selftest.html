@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8"><title>selftest</title>
+<pre id="out">running</pre>
+<iframe id="f" src="../index.html#/exam/set-20" style="width:1200px;height:800px"></iframe>
+<script>
+var out = document.getElementById("out"), f = document.getElementById("f");
+function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+(async function () {
+  try {
+    await wait(1500);
+    var w = f.contentWindow, d = f.contentDocument;
+    var set = w.BEP.sets["set-20"], ex = w.BEP.exams[set.exam], exp = { c: 0, w: 0, s: 0 };
+    for (var i = 0; i < set.questions.length; i++) {
+      var q = set.questions[i], mode = i % 4; // 0 correct, 1 wrong, 2 skip, 3 correct+mark
+      if (mode === 0 || mode === 3) { d.querySelector('.opt[data-o="' + q.a + '"]').click(); exp.c++; }
+      else if (mode === 1) { d.querySelector('.opt[data-o="' + ((q.a + 1) % 4) + '"]').click(); exp.w++; }
+      else exp.s++;
+      d.getElementById(mode === 3 ? "bMark" : "bSave").click();
+      await wait(20);
+    }
+    var pal = Array.from(d.querySelectorAll("#pal .qs")).map(function (b) { return b.className.replace("qs", "").replace("cur", "").trim() || "nv"; }).join(",");
+    d.getElementById("bSubmit").click(); await wait(100);
+    var rows = d.querySelector(".sum-table tfoot").textContent;
+    d.querySelector("[data-yes]").click(); await wait(1200);
+    var score = d.querySelector(".ring .mid b").textContent;
+    var expScore = Math.round((exp.c * ex.pos - exp.w * ex.neg) * 100) / 100;
+    out.textContent = JSON.stringify({ hash: w.location.hash, palette: pal, summary: rows, shown: score, expected: expScore, exp: exp,
+      pass: String(expScore) === score, sols: d.querySelectorAll(".sol").length });
+  } catch (e) { out.textContent = "ERR " + e.stack; }
+})();
+</script>

@@ -1,0 +1,14 @@
+{
+  "name": "बिहार परीक्षा मंच — Bihar Exam Pariksha",
+  "short_name": "Bihar Pariksha",
+  "description": "Free CBT-style mock tests for Bihar competitive exams",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f4ec",
+  "theme_color": "#2c2f86",
+  "lang": "hi",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
