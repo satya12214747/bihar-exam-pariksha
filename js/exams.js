@@ -1,6 +1,7 @@
 /* Exam configurations. Marking schemes follow the latest known notification
    patterns; update here if a commission changes its pattern. */
 window.BEP = window.BEP || { sets: {}, catalog: [] };
+BEP.version = 3;
 BEP.registerSet = function (d) { BEP.sets[d.id] = d; };
 
 BEP.exams = {
@@ -63,7 +64,7 @@ BEP.loadSet = function (id) {
   if (!/^set-\d{2}$/.test(id)) return Promise.reject(new Error("bad id"));
   return new Promise(function (resolve, reject) {
     var s = document.createElement("script");
-    s.src = "data/sets/" + id + ".js";
+    s.src = "data/sets/" + id + ".js?v=" + BEP.version;
     s.onload = function () { BEP.sets[id] ? resolve(BEP.sets[id]) : reject(new Error("empty")); };
     s.onerror = function () { s.remove(); reject(new Error("load failed")); };
     document.head.appendChild(s);

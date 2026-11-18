@@ -530,3 +530,26 @@ a { color: var(--brand); }
   .x-tools .pal-toggle span { display: none; }
   .x-tools .pal-toggle { width: 40px; padding: 0; }
 }
+
+/* ---------- Phones & tablets: normal page flow with a pinned action bar.
+   Fixed 100vh layouts hide the bottom bar behind mobile browser toolbars,
+   so on small screens the action bar is position:fixed to the visible
+   viewport instead. ---------- */
+@media (max-width: 980px) {
+  .exam { display: block; height: auto; min-height: 100vh; overflow: visible; }
+  .x-head { position: sticky; top: 0; z-index: 25; }
+  .x-sections { position: sticky; top: 56px; z-index: 24; }
+  .x-body, .x-main { display: block; border-right: 0; }
+  .q-bar { position: static; }
+  .q-scroll { overflow: visible; padding-bottom: calc(200px + env(safe-area-inset-bottom)); }
+  .x-actions {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 35;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -8px 24px -12px rgba(10, 12, 30, .35);
+  }
+  .x-side { height: 100%; }
+  .side-foot { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
+@media (max-width: 640px) {
+  .x-sections { top: 54px; }
+}
