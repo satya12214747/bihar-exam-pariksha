@@ -1,6 +1,6 @@
 /* Offline support: app shell is pre-cached; every file is fetched
    network-first and cached for offline use. Bump VERSION on deploy. */
-var VERSION = "bep-v1";
+var VERSION = "bep-v2";
 var SHELL = [
   "./", "index.html", "css/styles.css", "js/exams.js", "js/i18n.js", "js/store.js",
   "js/app.js", "data/index.js", "icon.svg", "manifest.webmanifest"

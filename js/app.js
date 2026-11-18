@@ -368,7 +368,7 @@
       '<div><div class="lbl">' + esc(t("timeLeft")) + '</div><div class="clock" id="clock">--:--</div></div></div>' +
       '<div class="x-tools">' + langSwitch(st.qlang, "data-ql") +
       '<button class="icon-btn fs-btn" type="button" id="fs" title="' + esc(t("fullscreen")) + '" aria-label="' + esc(t("fullscreen")) + '">⛶</button>' +
-      '<button class="icon-btn pal-toggle" type="button" id="palBtn" aria-label="' + esc(t("openPalette")) + '">▦</button></div></header>' +
+      '<button class="icon-btn pal-toggle" type="button" id="palBtn" aria-label="' + esc(t("openPalette")) + '">▦ <span>' + esc(t("openPalette")) + "</span></button></div></header>" +
       '<nav class="x-sections" id="secs" aria-label="' + esc(t("sections")) + '"></nav>' +
       '<div class="x-body"><section class="x-main">' +
       '<div class="q-bar"><h2 id="qno"></h2><div class="q-meta" id="qmeta"></div></div>' +
@@ -376,7 +376,8 @@
       '<div class="x-actions"><button class="btn btn-mark" id="bMark">' + esc(t("markNext")) + "</button>" +
       '<button class="btn btn-clear" id="bClear">' + esc(t("clear")) + '</button><span class="spacer"></span>' +
       '<button class="btn btn-ghost" id="bPrev">← ' + esc(t("prev")) + "</button>" +
-      '<button class="btn btn-save" id="bSave">' + esc(t("saveNext")) + " →</button></div></section>" +
+      '<button class="btn btn-save" id="bSave">' + esc(t("saveNext")) + " →</button>" +
+      '<button class="btn btn-primary m-submit" id="bSubmit2">✓ ' + esc(t("submit")) + "</button></div></section>" +
       '<aside class="x-side" id="side" aria-label="' + esc(t("palette")) + '"><div class="cand"><div class="avatar">' + esc(name.charAt(0).toUpperCase()) + "</div><div><b>" + esc(name) +
       "</b><small>" + esc(t("candidate")) + '</small></div></div><div class="legend-grid" id="legend"></div>' +
       '<div class="pal-wrap" id="pal"></div><div class="side-foot"><button class="btn btn-primary" id="bSubmit">' + esc(t("submit")) + "</button></div></aside></div>" +
@@ -546,6 +547,7 @@
     $("bClear").addEventListener("click", clearResp);
     $("bPrev").addEventListener("click", function () { goTo(st.cur - 1); });
     $("bSubmit").addEventListener("click", confirmSubmit);
+    $("bSubmit2").addEventListener("click", confirmSubmit);
     $("palBtn").addEventListener("click", openPalette);
     scrim.addEventListener("click", closePalette);
     $("fs").addEventListener("click", function () {
