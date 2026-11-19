@@ -1,9 +1,9 @@
 /* Offline support: app shell is pre-cached; every file is fetched
    network-first and cached for offline use. Bump VERSION on deploy. */
-var VERSION = "bep-v7";
+var VERSION = "bep-v8";
 var SHELL = [
-  "./", "index.html", "css/styles.css?v=7", "js/exams.js?v=7", "js/i18n.js?v=7", "js/store.js?v=7",
-  "js/app.js?v=7", "data/index.js?v=7", "js/about.js?v=7", "js/boot.js?v=7", "js/guides.js?v=7", "icon.svg", "manifest.webmanifest"
+  "./", "index.html", "css/styles.css?v=8", "js/exams.js?v=8", "js/i18n.js?v=8", "js/store.js?v=8",
+  "js/app.js?v=8", "data/index.js?v=8", "js/about.js?v=8", "js/boot.js?v=8", "js/guides.js?v=8", "icon.svg", "manifest.webmanifest"
 ];
 
 self.addEventListener("install", function (e) {
@@ -18,6 +18,10 @@ self.addEventListener("activate", function (e) {
 
 self.addEventListener("fetch", function (e) {
   if (e.request.method !== "GET") return;
+  // Only this site and Google Fonts. Never touch GitHub API calls from the admin page.
+  var u = new URL(e.request.url);
+  if (u.origin !== self.location.origin && !/^fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)) return;
+  if (/\/admin\.html$|\/js\/admin\.js|\/css\/admin\.css/.test(u.pathname)) return;
   // Network-first: always fresh when online, cached copy when offline.
   e.respondWith(caches.open(VERSION).then(function (cache) {
     return fetch(e.request).then(function (res) {

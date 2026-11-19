@@ -1,7 +1,7 @@
 /* Exam configurations. Marking schemes follow the latest known notification
    patterns; update here if a commission changes its pattern. */
 window.BEP = window.BEP || { sets: {}, catalog: [] };
-BEP.version = 7;
+BEP.version = 8;
 BEP.registerSet = function (d) { BEP.sets[d.id] = d; };
 
 BEP.exams = {
@@ -76,7 +76,7 @@ BEP.loadScript = function (path) {
 /* Load a set file on demand (a script tag works from file:// too). */
 BEP.loadSet = function (id) {
   if (BEP.sets[id]) return Promise.resolve(BEP.sets[id]);
-  if (!/^set-\d{2}$/.test(id)) return Promise.reject(new Error("bad id"));
+  if (!/^set-\d{2,3}$/.test(id)) return Promise.reject(new Error("bad id"));
   return new Promise(function (resolve, reject) {
     var s = document.createElement("script");
     s.src = "data/sets/" + id + ".js?v=" + BEP.version;
