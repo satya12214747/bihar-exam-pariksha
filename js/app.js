@@ -43,6 +43,8 @@
     return m ? m + "m " + s + "s" : s + "s";
   }
   var KEYS = ["A", "B", "C", "D"];
+  var DIFFS = ["easy", "medium", "hard"];
+  var STATES = ["nv", "na", "a", "m", "am"];
   function catalogEntry(id) { return (BEP.catalog || []).filter(function (c) { return c.id === id; })[0]; }
   function examOf(x) { return BEP.exams[x.exam] || BEP.exams["bihar-gk"]; }
 
@@ -118,9 +120,25 @@
       prefs.theme = isDark() ? "light" : "dark"; S.setPref("theme", prefs.theme); applyTheme(); route();
     });
   }
+  function safeUrl(u) { return /^(https:\/\/|mailto:)[^\s"'<>]+$/i.test(u || "") ? u : ""; }
+  function aboutSection() {
+    var a = BEP.about; if (!a) return "";
+    var links = (a.links || []).filter(function (l) { return safeUrl(l.url); }).map(function (l) {
+      return '<a class="btn btn-ghost btn-sm" href="' + esc(safeUrl(l.url)) + '" target="_blank" rel="noopener noreferrer">' + esc(l.label) + " ↗</a>";
+    }).join("");
+    var photo = a.photo && /^[\w\/.-]+\.(png|jpe?g|webp|svg)$/i.test(a.photo)
+      ? '<img class="about-photo" src="' + esc(a.photo) + '" alt="' + esc(a.name) + '" width="120" height="120" loading="lazy">'
+      : '<div class="about-photo about-initials" aria-hidden="true">' + esc(a.initials || a.name.charAt(0)) + "</div>";
+    return '<section class="wrap" id="about"><div class="sec-head"><div><h2>' + esc(t("aboutTitle")) + "</h2></div></div>" +
+      '<div class="about">' + photo + '<div class="about-body"><h3>' + esc(a.name) + '</h3><p class="about-role">' + esc(L(a.role)) + "</p>" +
+      "<p>" + esc(L(a.bio)) + '</p><p class="about-mission">“' + esc(L(a.mission)) + "”</p>" +
+      (links ? '<div class="about-links">' + links + "</div>" : "") + "</div></div></section>";
+  }
   function footer() {
+    var by = BEP.about ? BEP.about.name : "";
     return '<footer class="footer"><div class="wrap"><b>' + esc(t("brand")) + "</b><span>" + esc(t("footer")) +
-      '</span><small>' + esc(t("disclaimer")) + "</small></div></footer>";
+      '</span><small>' + esc(t("disclaimer")) + "</small>" +
+      (by ? "<small>© " + new Date().getFullYear() + " " + esc(by) + " · " + esc(t("madeWith")) + "</small>" : "") + "</div></footer>";
   }
   function loadingView() {
     app.innerHTML = topbar() + '<div class="loading"><div class="spinner"></div><div>' + esc(t("loading")) + "</div></div>";
@@ -167,7 +185,7 @@
   function homeStats() {
     var taken = 0, bestPct = null, accSum = 0, accN = 0;
     (BEP.catalog || []).forEach(function (c) {
-      S.attempts(c.id).forEach(function (a) {
+      cleanAtts(c.id).forEach(function (a) {
         taken++;
         var pct = a.max ? Math.max(0, a.score) / a.max * 100 : 0;
         if (bestPct == null || pct > bestPct) bestPct = pct;
@@ -178,7 +196,7 @@
   }
 
   function testCard(c) {
-    var ex = examOf(c), atts = S.attempts(c.id), prog = S.progress(c.id);
+    var ex = examOf(c), atts = cleanAtts(c.id), prog = S.progress(c.id);
     var max = c.count * ex.pos;
     var best = atts.reduce(function (m, a) { return Math.max(m, a.score); }, -Infinity);
     var foot = prog
@@ -187,7 +205,7 @@
         ? '<span class="best">' + esc(t("best")) + ": <b>" + num(best) + "/" + max + "</b><br>" + atts.length + " " + esc(t("attempts")) + "</span>"
         : '<span class="best">' + esc(t("notAttempted")) + "</span>";
     var btn = prog ? t("resume") : atts.length ? t("reattempt") : t("start");
-    return '<article class="card" style="--c:' + ex.color + '">' +
+    return '<article class="card" style="--c:' + esc(ex.color) + '">' +
       '<div class="card-top"><span class="badge">' + esc(L(ex.short)) + '</span><span class="setno">#' + c.id.slice(4) + "</span></div>" +
       "<h3>" + esc(L(c.title)) + "</h3>" +
       '<div class="meta"><div><b>' + c.count + "</b><span>" + esc(t("questions")) + "</span></div>" +
@@ -198,7 +216,7 @@
       "<span>" + esc(t("perQ")) + "</span></div>" +
       '<div class="card-foot">' + foot +
       (atts.length && !prog ? '<a class="btn btn-ghost btn-sm" href="#/result/' + c.id + "/" + atts[0].id + '">' + esc(t("viewResult")) + "</a>" : "") +
-      '<a class="btn btn-primary btn-sm" href="#/test/' + c.id + '">' + esc(btn) + "</a></div></article>";
+      '<a class="btn btn-primary btn-sm" href="#/test/' + esc(c.id) + '">' + esc(btn) + "</a></div></article>";
   }
 
   function renderHome() {
@@ -251,7 +269,7 @@
       '<section class="wrap" id="tests"><div class="sec-head"><div><h2>' + esc(t("testsTitle")) + "</h2><p>" + esc(t("testsSub")) + "</p></div></div>" +
       '<div class="chips" role="group" aria-label="Filter">' + chips + '</div><div class="grid" id="grid"></div></section>' +
       '<section class="wrap" id="patterns"><div class="sec-head"><div><h2>' + esc(t("examPattern")) + "</h2><p>" + esc(t("subjectiveNote")) + "</p></div></div>" +
-      '<div class="features">' + patterns + "</div></section></main>" + footer();
+      '<div class="features">' + patterns + "</div></section>" + aboutSection() + "</main>" + footer();
 
     function drawGrid() {
       var list = (BEP.catalog || []).filter(function (c) { return homeFilter === "all" || c.exam === homeFilter; });
@@ -331,6 +349,36 @@
     };
   }
 
+  /* Saved state comes from localStorage, so treat it as untrusted:
+     anything malformed is discarded and the test starts fresh. */
+  function isNum(x) { return typeof x === "number" && isFinite(x) && x >= 0; }
+  function sanitizeProgress(p, n) {
+    if (!p || typeof p !== "object" || !Array.isArray(p.saved) || !Array.isArray(p.status) || !Array.isArray(p.times)) return null;
+    if (p.saved.length !== n || p.status.length !== n || p.times.length !== n) return null;
+    if (!isNum(p.total) || !isNum(p.remaining) || p.remaining > p.total || !(p.cur >= 0 && p.cur < n && p.cur % 1 === 0)) return null;
+    for (var i = 0; i < n; i++) {
+      if (!(p.saved[i] === null || [0, 1, 2, 3].indexOf(p.saved[i]) >= 0)) return null;
+      if (STATES.indexOf(p.status[i]) < 0 || !isNum(p.times[i])) return null;
+    }
+    p.qlang = p.qlang === "en" ? "en" : "hi";
+    return p;
+  }
+  function sanitizeAttempt(a, n) {
+    if (!a || !Array.isArray(a.saved) || !Array.isArray(a.status) || !Array.isArray(a.times) || a.saved.length !== n) return null;
+    if (![a.correct, a.wrong, a.skipped, a.neg, a.timeTaken, a.max].every(isNum) || typeof a.score !== "number" || !isFinite(a.score)) return null;
+    a.times = a.times.map(function (x) { return isNum(x) ? Math.round(x) : 0; });
+    a.status = a.status.map(function (x) { return STATES.indexOf(x) >= 0 ? x : "nv"; });
+    a.saved = a.saved.map(function (x) { return [0, 1, 2, 3].indexOf(x) >= 0 ? x : null; });
+    return a;
+  }
+
+  function cleanAtts(id) {
+    return S.attempts(id).filter(function (a) {
+      return a && typeof a.id === "string" && /^a[0-9a-z]+$/.test(a.id) && isNum(a.ts) &&
+        [a.correct, a.wrong, a.skipped, a.max].every(isNum) && typeof a.score === "number" && isFinite(a.score);
+    });
+  }
+
   function evaluate(set, st) {
     var ex = examOf(set), c = 0, w = 0, s = 0;
     set.questions.forEach(function (q, i) {
@@ -351,8 +399,7 @@
 
   function renderExam(set) {
     var ex = examOf(set), Q = set.questions, n = Q.length;
-    var st = S.progress(set.id);
-    if (!st || st.saved.length !== n) st = newProgress(set);
+    var st = sanitizeProgress(S.progress(set.id), n) || newProgress(set);
     var pending = st.saved[st.cur];
     if (st.status[st.cur] === "nv") st.status[st.cur] = "na";
     var timerId = null, last = Date.now(), acc = 0, finished = false;
@@ -407,7 +454,7 @@
       $("secs").innerHTML = set.sections.map(function (s) {
         var idx = []; Q.forEach(function (q, i) { if (q.s === s.id) idx.push(i); });
         var done = idx.filter(function (i) { return st.status[i] === "a" || st.status[i] === "am"; }).length;
-        return '<button class="x-sec" data-sec="' + s.id + '" aria-current="' + (s.id === curSec) + '">' + esc(L(s.name, st.qlang)) +
+        return '<button class="x-sec" data-sec="' + esc(s.id) + '" aria-current="' + (s.id === curSec) + '">' + esc(L(s.name, st.qlang)) +
           ' <span class="cnt">' + done + "/" + idx.length + "</span></button>";
       }).join("");
       var cur = $("secs").querySelector('[aria-current="true"]');
@@ -423,7 +470,7 @@
         var html = "";
         Q.forEach(function (q, i) {
           if (q.s !== s.id) return;
-          html += '<button class="qs ' + (st.status[i] === "nv" ? "" : st.status[i]) + (i === st.cur ? " cur" : "") + '" data-q="' + i +
+          html += '<button class="qs ' + (STATES.indexOf(st.status[i]) > 0 ? st.status[i] : "") + (i === st.cur ? " cur" : "") + '" data-q="' + i +
             '" aria-label="' + esc(t("question")) + " " + (i + 1) + ", " + esc(t(st.status[i])) + '">' + (i + 1) + "</button>";
         });
         return '<div class="pal-sec">' + esc(L(s.name, st.qlang)) + '</div><div class="palette">' + html + "</div>";
@@ -438,7 +485,7 @@
       var q = Q[st.cur], lang = st.qlang;
       $("qno").textContent = t("question") + " " + (st.cur + 1) + " " + t("of") + " " + n;
       $("qmeta").innerHTML = "<span>" + esc(L(secIndex[q.s] ? secIndex[q.s].name : q.s, lang)) + "</span>" +
-        '<span class="diff ' + q.d + '">' + esc(q.d) + "</span>" +
+        '<span class="diff ' + (DIFFS.indexOf(q.d) >= 0 ? q.d : "medium") + '">' + esc(q.d) + "</span>" +
         '<span class="pill pos">+' + num(ex.pos) + "</span>" + (ex.neg ? '<span class="pill neg">' + negLabel(ex.neg) + "</span>" : "");
       var qt = $("qtext");
       qt.className = "q-text " + lang;
@@ -614,9 +661,9 @@
     }).join("");
     var answeredTimes = att.times.reduce(function (a, b) { return a + b; }, 0);
 
-    var hist = S.attempts(set.id).map(function (a, i) {
+    var hist = cleanAtts(set.id).map(function (a, i) {
       var d = new Date(a.ts);
-      return "<tr" + (a.id === att.id ? ' style="font-weight:700"' : "") + "><td>" + (S.attempts(set.id).length - i) + "</td><td>" + d.toLocaleDateString() + " " +
+      return "<tr" + (a.id === att.id ? ' style="font-weight:700"' : "") + "><td>" + (cleanAtts(set.id).length - i) + "</td><td>" + d.toLocaleDateString() + " " +
         d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) + "</td><td>" + num(a.score) + "/" + a.max + "</td><td>" + a.correct + "/" + a.wrong + "/" + a.skipped +
         '</td><td><a href="#/result/' + set.id + "/" + a.id + '">→</a></td></tr>';
     }).join("");
@@ -702,7 +749,7 @@
       if (view === "test") { document.title = L(set.title) + " · " + t("brand"); renderInstructions(set); }
       else if (view === "exam") { document.title = "⏱ " + L(set.title); renderExam(set); }
       else {
-        var att = S.attempt(id, parts[2]);
+        var att = sanitizeAttempt(S.attempt(id, parts[2]), set.questions.length);
         if (!att) { location.hash = "#/test/" + id; return; }
         document.title = t("resTitle") + " · " + L(set.title);
         renderResult(set, att);
