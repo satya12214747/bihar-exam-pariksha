@@ -573,3 +573,5 @@ a { color: var(--brand); }
   .about-links { justify-content: center; }
   .about-photo { width: 104px; height: 104px; }
 }
+.dev-credit { margin: 8px 0 0; font-size: 15px; color: var(--ink-2); }
+.dev-credit b { color: var(--brand); }

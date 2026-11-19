@@ -130,7 +130,7 @@
       ? '<img class="about-photo" src="' + esc(a.photo) + '" alt="' + esc(a.name) + '" width="120" height="120" loading="lazy">'
       : '<div class="about-photo about-initials" aria-hidden="true">' + esc(a.initials || a.name.charAt(0)) + "</div>";
     return '<section class="wrap" id="about"><div class="sec-head"><div><h2>' + esc(t("aboutTitle")) + "</h2></div></div>" +
-      '<div class="about">' + photo + '<div class="about-body"><h3>' + esc(a.name) + '</h3><p class="about-role">' + esc(L(a.role)) + "</p>" +
+      '<div class="about">' + photo + '<div class="about-body"><h3>' + esc(a.name) + '</h3><p class="about-role">' + esc(L(a.role)) + (a.place ? " · 📍 " + esc(L(a.place)) : "") + "</p>" +
       "<p>" + esc(L(a.bio)) + '</p><p class="about-mission">“' + esc(L(a.mission)) + "”</p>" +
       (links ? '<div class="about-links">' + links + "</div>" : "") + "</div></div></section>";
   }
@@ -138,7 +138,9 @@
     var by = BEP.about ? BEP.about.name : "";
     return '<footer class="footer"><div class="wrap"><b>' + esc(t("brand")) + "</b><span>" + esc(t("footer")) +
       '</span><small>' + esc(t("disclaimer")) + "</small>" +
-      (by ? "<small>© " + new Date().getFullYear() + " " + esc(by) + " · " + esc(t("madeWith")) + "</small>" : "") + "</div></footer>";
+      (by ? '<p class="dev-credit">' + esc(t("developedBy")) + " <b>" + esc(by) + "</b>" +
+        (BEP.about.place ? " · " + esc(L(BEP.about.place)) : "") + "</p>" +
+        "<small>© " + new Date().getFullYear() + " " + esc(by) + " · " + esc(t("madeWith")) + "</small>" : "") + "</div></footer>";
   }
   function loadingView() {
     app.innerHTML = topbar() + '<div class="loading"><div class="spinner"></div><div>' + esc(t("loading")) + "</div></div>";

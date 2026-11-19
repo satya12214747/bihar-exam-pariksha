@@ -48,7 +48,7 @@ BEP.i18n = {
     history: "पिछले प्रयास", date: "तारीख", noneHere: "इस फ़िल्टर में कोई प्रश्न नहीं।",
     secs: "से", reviewPrint: "प्रिंट / PDF", examPattern: "परीक्षा पैटर्न", subjectiveNote: "मॉक में प्रति प्रश्न समय वास्तविक परीक्षा के अनुपात में रखा गया है।",
     resumeExam: "आपका पिछला प्रयास वहीं से जारी है जहाँ छोड़ा था।",
-    aboutTitle: "मेरे बारे में", madeWith: "बिहार के छात्रों के लिए ❤ से बनाया गया"
+    aboutTitle: "मेरे बारे में", developedBy: "विकसितकर्ता:", madeWith: "बिहार के छात्रों के लिए ❤ से बनाया गया"
   },
   en: {
     brand: "Bihar Exam Pariksha", brandSub: "बिहार परीक्षा मंच",
@@ -98,6 +98,6 @@ BEP.i18n = {
     history: "Previous attempts", date: "Date", noneHere: "No questions in this filter.",
     secs: "s", reviewPrint: "Print / PDF", examPattern: "Exam pattern", subjectiveNote: "Time per question in the mock is scaled from the real exam.",
     resumeExam: "Your previous attempt continues where you left off.",
-    aboutTitle: "About me", madeWith: "Made with ❤ for the students of Bihar"
+    aboutTitle: "About me", developedBy: "Developed by", madeWith: "Made with ❤ for the students of Bihar"
   }
 };

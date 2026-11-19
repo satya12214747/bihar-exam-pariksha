@@ -3,6 +3,7 @@
 BEP.about = {
   name: "Satya Prakash",
   initials: "SP",
+  place: { en: "Samastipur, Bihar", hi: "समस्तीपुर, बिहार" },
   photo: "",              // optional: e.g. "img/satya.jpg" (put the image in the repo)
   role: {
     en: "Creator, Bihar Exam Pariksha",
