@@ -1,7 +1,7 @@
 /* Exam configurations. Marking schemes follow the latest known notification
    patterns; update here if a commission changes its pattern. */
 window.BEP = window.BEP || { sets: {}, catalog: [] };
-BEP.version = 5;
+BEP.version = 6;
 BEP.registerSet = function (d) { BEP.sets[d.id] = d; };
 
 BEP.exams = {

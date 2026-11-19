@@ -1,9 +1,9 @@
 /* Offline support: app shell is pre-cached; every file is fetched
    network-first and cached for offline use. Bump VERSION on deploy. */
-var VERSION = "bep-v5";
+var VERSION = "bep-v6";
 var SHELL = [
-  "./", "index.html", "css/styles.css?v=5", "js/exams.js?v=5", "js/i18n.js?v=5", "js/store.js?v=5",
-  "js/app.js?v=5", "data/index.js?v=5", "js/about.js?v=5", "js/boot.js?v=5", "icon.svg", "manifest.webmanifest"
+  "./", "index.html", "css/styles.css?v=6", "js/exams.js?v=6", "js/i18n.js?v=6", "js/store.js?v=6",
+  "js/app.js?v=6", "data/index.js?v=6", "js/about.js?v=6", "js/boot.js?v=6", "icon.svg", "manifest.webmanifest"
 ];
 
 self.addEventListener("install", function (e) {

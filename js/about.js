@@ -18,8 +18,7 @@ BEP.about = {
     hi: "बिहार के हर छात्र के लिए — हमेशा निःशुल्क।"
   },
   links: [
-    { label: "GitHub", url: "https://github.com/satya12214747" },
-    { label: "LinkedIn", url: "" },
+    { label: "LinkedIn", url: "https://www.linkedin.com/in/satyaprakaash/" },
     { label: "Instagram", url: "" },
     { label: "YouTube", url: "" },
     { label: "Telegram", url: "" },
