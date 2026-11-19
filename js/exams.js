@@ -1,7 +1,7 @@
 /* Exam configurations. Marking schemes follow the latest known notification
    patterns; update here if a commission changes its pattern. */
 window.BEP = window.BEP || { sets: {}, catalog: [] };
-BEP.version = 6;
+BEP.version = 7;
 BEP.registerSet = function (d) { BEP.sets[d.id] = d; };
 
 BEP.exams = {
@@ -57,6 +57,21 @@ BEP.exams = {
 };
 
 BEP.examOrder = ["bpsc", "bihar-si", "bssc-inter", "bssc-cgl", "csbc", "bpsc-tre", "bihar-gk"];
+
+/* Load a whole script once, on demand (keeps the first page light on slow networks). */
+BEP._scripts = {};
+BEP.loadScript = function (path) {
+  if (!/^js\/[a-z0-9-]+\.js$/.test(path)) return Promise.reject(new Error("bad path"));
+  if (BEP._scripts[path]) return BEP._scripts[path];
+  BEP._scripts[path] = new Promise(function (resolve, reject) {
+    var s = document.createElement("script");
+    s.src = path + "?v=" + BEP.version;
+    s.onload = resolve;
+    s.onerror = function () { s.remove(); delete BEP._scripts[path]; reject(new Error("load failed")); };
+    document.head.appendChild(s);
+  });
+  return BEP._scripts[path];
+};
 
 /* Load a set file on demand (a script tag works from file:// too). */
 BEP.loadSet = function (id) {

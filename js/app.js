@@ -248,9 +248,10 @@
 
     var patterns = BEP.examOrder.filter(function (k) { return counts[k]; }).map(function (k) {
       var ex = BEP.exams[k];
-      return '<div class="feature" style="border-top:4px solid ' + ex.color + '"><h4>' + esc(L(ex.name)) + '</h4><p>' + esc(L(ex.body)) + "</p>" +
+      return '<div class="feature pattern-card" style="border-top:4px solid ' + esc(ex.color) + '"><h4>' + esc(L(ex.name)) + '</h4><p>' + esc(L(ex.body)) + "</p>" +
         '<p style="margin-top:8px">' + esc(L(ex.pattern)) + '</p><div class="scheme" style="margin-top:10px;display:flex;gap:6px"><span class="pill pos">+' + num(ex.pos) +
-        "</span>" + (ex.neg ? '<span class="pill neg">' + negLabel(ex.neg) + "</span>" : '<span class="pill zero">' + esc(t("noNeg")) + "</span>") + "</div></div>";
+        "</span>" + (ex.neg ? '<span class="pill neg">' + negLabel(ex.neg) + "</span>" : '<span class="pill zero">' + esc(t("noNeg")) + "</span>") + "</div>" +
+        '<a class="btn btn-primary btn-sm guide-btn" href="#/guide/' + esc(k) + '">📘 ' + esc(t("openGuide")) + " →</a></div>";
     }).join("");
 
     app.innerHTML = topbar() +
@@ -270,7 +271,7 @@
       '<section class="wrap"><div class="features">' + feats + "</div></section>" +
       '<section class="wrap" id="tests"><div class="sec-head"><div><h2>' + esc(t("testsTitle")) + "</h2><p>" + esc(t("testsSub")) + "</p></div></div>" +
       '<div class="chips" role="group" aria-label="Filter">' + chips + '</div><div class="grid" id="grid"></div></section>' +
-      '<section class="wrap" id="patterns"><div class="sec-head"><div><h2>' + esc(t("examPattern")) + "</h2><p>" + esc(t("subjectiveNote")) + "</p></div></div>" +
+      '<section class="wrap" id="patterns"><div class="sec-head"><div><h2>' + esc(t("patternGuideTitle")) + "</h2><p>" + esc(t("patternGuideSub")) + "</p></div></div>" +
       '<div class="features">' + patterns + "</div></section>" + aboutSection() + "</main>" + footer();
 
     function drawGrid() {
@@ -735,6 +736,86 @@
     });
   }
 
+  /* ---------------- PREPARATION GUIDE ---------------- */
+  /* Expected marks from a guess = pos/k - neg*(k-1)/k, where k = options left. */
+  function guessRows(ex) {
+    return [4, 3, 2].map(function (k) {
+      var ev = ex.pos / k - ex.neg * (k - 1) / k;
+      var cls = ev > 0.005 ? "go" : ev < -0.005 ? "no" : "mid";
+      var verdict = cls === "go" ? t("guessYes") : cls === "no" ? t("guessNo") : t("guessNeutral");
+      return "<tr><td>" + esc(t("guessK" + k)) + '</td><td class="ev ' + cls + '">' + (ev > 0.005 ? "+" : ev < -0.005 ? "−" : "") + num(Math.abs(ev)) +
+        '</td><td><span class="verdict-chip ' + cls + '">' + esc(verdict) + "</span></td></tr>";
+    }).join("");
+  }
+
+  function renderGuide(id) {
+    var g = BEP.guides[id], c = BEP.guides.common, ex = BEP.exams[id];
+    var sets = (BEP.catalog || []).filter(function (x) { return x.exam === id; });
+    function li(arr) { return arr.map(function (x) { return "<li>" + esc(L(x)) + "</li>"; }).join(""); }
+    var toc = [["g-pattern", "gPattern"], ["g-syllabus", "gSyllabus"], ["g-strategy", "gStrategy"], ["g-guess", "gGuess"],
+      ["g-roadmap", "gRoadmap"], ["g-daily", "gDaily"], ["g-books", "gBooks"], ["g-mistakes", "gMistakes"]];
+
+    app.innerHTML = topbar() + '<main class="wrap guide">' +
+      '<div class="ins-head"><a class="btn btn-ghost btn-sm" href="#/">← ' + esc(t("backHome")) + '</a><span class="badge" style="--c:' + esc(ex.color) + '">' + esc(L(ex.short)) + "</span></div>" +
+
+      '<header class="guide-hero" style="--c:' + esc(ex.color) + '"><p class="g-eyebrow">📘 ' + esc(t("guideTitle")) + "</p><h1>" + esc(L(ex.name)) + "</h1><p>" + esc(L(ex.body)) + "</p>" +
+      '<div class="tiles"><div class="tile"><b>' + g.stages.length + "</b><span>" + esc(t("gStages")) + '</span></div><div class="tile"><b>' + esc(L(g.level)) + "</b><span>" + esc(t("gLevel")) +
+      '</span></div><div class="tile"><b>+' + num(ex.pos) + " / " + negLabel(ex.neg) + "</b><span>" + esc(t("gMarking")) + '</span></div><div class="tile"><b>' + esc(L(g.roadmap.span)) +
+      "</b><span>" + esc(t("gRoadmap")) + "</span></div></div></header>" +
+
+      '<nav class="chips guide-toc" aria-label="Contents">' + toc.map(function (x) {
+        return '<a class="chip" href="#' + x[0] + '" data-jump="' + x[0] + '">' + esc(t(x[1])) + "</a>";
+      }).join("") + "</nav>" +
+
+      '<section class="panel g-sec" id="g-pattern"><h2>🧭 ' + esc(t("gPattern")) + '</h2><ol class="stages">' + g.stages.map(function (s, i) {
+        return '<li class="stage"><span class="stage-no">' + (i + 1) + "</span><div><h3>" + esc(L(s.name)) +
+          ' <span class="stage-tag ' + (s.tag === "merit" ? "merit" : "qual") + '">' + esc(t(s.tag === "merit" ? "gMerit" : "gQualifying")) + "</span></h3><ul>" + li(s.points) + "</ul></div></li>";
+      }).join("") + '</ol><p class="muted small">⚠ ' + esc(t("gVerify")) + "</p></section>" +
+
+      '<section class="panel g-sec" id="g-syllabus"><h2>📚 ' + esc(t("gSyllabus")) + '</h2><div class="syl-grid">' + g.syllabus.map(function (s) {
+        return '<div class="syl"><h3>' + esc(L(s.h)) + "</h3><p>" + esc(L(s.items)) + "</p></div>";
+      }).join("") + "</div></section>" +
+
+      '<section class="panel g-sec" id="g-strategy"><h2>🎯 ' + esc(t("gStrategy")) + '</h2><div class="strat-grid">' + g.strategy.map(function (s, i) {
+        return '<div class="strat"><span class="strat-no">' + (i + 1) + "</span><h3>" + esc(L(s.t)) + "</h3><p>" + esc(L(s.d)) + "</p></div>";
+      }).join("") + "</div>" +
+      (g.tips && g.tips.length ? '<h3 class="sub">💡 ' + esc(t("gTips")) + '</h3><ul class="ticks">' + li(g.tips) + "</ul>" : "") + "</section>" +
+
+      '<section class="panel g-sec" id="g-guess"><h2>🎲 ' + esc(t("gGuess")) + "</h2><p>" +
+      esc(t("guessIntro", { pos: num(ex.pos), neg: ex.neg ? num(ex.neg) : "0" })) +
+      '</p><div style="overflow-x:auto"><table class="sum-table guess-table"><thead><tr><th>' + esc(t("guessSituation")) + "</th><th>" + esc(t("guessEV")) +
+      "</th><th>" + esc(t("guessDo")) + "</th></tr></thead><tbody>" + guessRows(ex) + '</tbody></table></div><p class="muted small">' +
+      esc(ex.neg ? t("guessNoteNeg") : t("guessNoteZero")) + "</p></section>" +
+
+      '<section class="panel g-sec" id="g-roadmap"><h2>🗺️ ' + esc(t("gRoadmap")) + " — " + esc(L(g.roadmap.span)) + '</h2><ol class="timeline">' + g.roadmap.phases.map(function (p) {
+        return '<li><span class="when">' + esc(L(p.when)) + "</span><h3>" + esc(L(p.t)) + "</h3><p>" + esc(L(p.d)) + "</p></li>";
+      }).join("") + "</ol></section>" +
+
+      '<section class="panel g-sec" id="g-daily"><h2>⏰ ' + esc(t("gDaily")) + '</h2><div class="daily">' + c.daily.map(function (d) {
+        return '<div class="slot"><b>' + esc(L(d.t)) + "</b><span>" + esc(L(d.d)) + "</span></div>";
+      }).join("") + "</div></section>" +
+
+      '<section class="panel g-sec" id="g-books"><h2>📖 ' + esc(t("gBooks")) + '</h2><ul class="books">' + g.books.map(function (b) {
+        return "<li><b>" + esc(L(b.t)) + "</b><span>" + esc(L(b.d)) + "</span></li>";
+      }).join("") + "</ul></section>" +
+
+      '<section class="panel g-sec" id="g-mistakes"><h2>🚫 ' + esc(t("gMistakes")) + '</h2><ul class="crosses">' + li(c.mistakes) + "</ul></section>" +
+
+      (sets.length ? '<section class="g-sec"><div class="sec-head"><div><h2>✍️ ' + esc(t("gPractice")) + "</h2><p>" + esc(t("gPracticeSub")) +
+        '</p></div></div><div class="grid">' + sets.map(testCard).join("") + "</div></section>" : "") +
+      "</main>" + footer();
+
+    bindChrome(app);
+    app.querySelectorAll("[data-jump]").forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+        var el = document.getElementById(a.getAttribute("data-jump"));
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  }
+
+
   /* ---------------- ROUTER ---------------- */
   function route() {
     if (cleanup) { cleanup(); cleanup = null; }
@@ -745,6 +826,16 @@
     var scrollTop = function () { window.scrollTo(0, 0); };
 
     if (!view) { renderHome(); return; }
+    if (view === "guide") {
+      if (!BEP.exams[id]) { location.hash = "#/"; return; }
+      loadingView();
+      BEP.loadScript("js/guides.js").then(function () {
+        if (!BEP.guides || !BEP.guides[id]) throw new Error("no guide");
+        document.title = t("guideTitle") + " · " + L(BEP.exams[id].name);
+        renderGuide(id); scrollTop();
+      }).catch(errorView);
+      return;
+    }
     if (["test", "exam", "result"].indexOf(view) < 0 || !id) { location.hash = "#/"; return; }
     loadingView();
     BEP.loadSet(id).then(function (set) {
